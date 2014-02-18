@@ -123,6 +123,7 @@ elm_main(int argc EINA_UNUSED, char **argv EINA_UNUSED)
    ephysics_body_evas_object_set(pipe_1_body, pipe_1_image, EINA_TRUE);
    ephysics_body_restitution_set(pipe_1_body, EPHYSICS_BODY_RESTITUTION_IRON);
    ephysics_body_friction_set(pipe_1_body, EPHYSICS_BODY_FRICTION_IRON);
+   ephysics_body_mass_set(pipe_1_body, EPHYSICS_BODY_MASS_STATIC);
 
    pipe_2_image = evas_object_rectangle_add(evas);
    evas_object_color_set(pipe_2_image, 255, 0, 0, 255);
@@ -134,6 +135,7 @@ elm_main(int argc EINA_UNUSED, char **argv EINA_UNUSED)
    ephysics_body_evas_object_set(pipe_2_body, pipe_2_image, EINA_TRUE);
    ephysics_body_restitution_set(pipe_2_body, EPHYSICS_BODY_RESTITUTION_IRON);
    ephysics_body_friction_set(pipe_2_body, EPHYSICS_BODY_FRICTION_IRON);
+   ephysics_body_mass_set(pipe_2_body, EPHYSICS_BODY_MASS_STATIC);
 
    ecore_timer_add(0.3, _move_bird, bird_body);
    elm_object_event_callback_add(win, _key_pressed, bird_body);
