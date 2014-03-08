@@ -46,7 +46,7 @@ _key_pressed(void *data, Evas_Object *obj, Evas_Object *src, Evas_Callback_Type 
    if (strcmp(ev->keyname, "space"))
      return EINA_FALSE;
 
-   ephysics_body_central_impulse_apply(bird_body, 0, -200, 0);
+   ephysics_body_linear_velocity_set(bird_body, 0, -170, 0);
    return EINA_TRUE;
 }
 
@@ -188,6 +188,7 @@ elm_main(int argc EINA_UNUSED, char **argv EINA_UNUSED)
    ephysics_body_evas_object_set(bird_body, bird_image, EINA_TRUE);
    ephysics_body_restitution_set(bird_body, EPHYSICS_BODY_RESTITUTION_PLASTIC);
    ephysics_body_friction_set(bird_body, EPHYSICS_BODY_FRICTION_PLASTIC);
+   ephysics_body_mass_set(bird_body, 1.5);
    ephysics_body_event_callback_add(bird_body, EPHYSICS_CALLBACK_BODY_COLLISION,
                                     _collision_cb, win);
    ephysics_body_event_callback_add(bird_body, EPHYSICS_CALLBACK_BODY_UPDATE,
