@@ -94,21 +94,18 @@ _move_world(void *data)
    return EINA_TRUE;
 }
 
-static Eina_Bool
-_key_pressed(void *data, Evas_Object *obj, Evas_Object *src, Evas_Callback_Type type, void *event_info)
+static void
+_key_pressed(void *data, Evas *e, Evas_Object *obj, void *event_info)
 {
    Evas_Event_Key_Down *ev = event_info;
    EPhysics_Body *bird_body = data;
 
    if (!keep_moving_world)
-     return EINA_FALSE;
-   if (type != EVAS_CALLBACK_KEY_UP)
-     return EINA_FALSE;
+     return;
    if (strcmp(ev->keyname, "space"))
-     return EINA_FALSE;
+     return;
 
    ephysics_body_linear_velocity_set(bird_body, 0, -170, 0);
-   return EINA_TRUE;
 }
 
 static void
@@ -291,7 +288,7 @@ elm_main(int argc EINA_UNUSED, char **argv EINA_UNUSED)
    _generate_pipes_position(evas);
 
    ecore_timer_add(0.01, _move_world, NULL);
-   elm_object_event_callback_add(win, _key_pressed, bird_body);
+   evas_object_event_callback_add(win, EVAS_CALLBACK_KEY_UP, _key_pressed, bird_body);
 
    elm_run();
 
