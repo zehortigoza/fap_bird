@@ -67,7 +67,7 @@ _pipe_position_calc_and_place(Pipe *pipe, int x)
 }
 
 static void
-score_update()
+score_update(void)
 {
    char text[512];
    sprintf(text, "%d", score);
@@ -78,7 +78,6 @@ static Eina_Bool
 _move_world(void *data)
 {
    Pipe *move = NULL;
-   Eina_List *l;
    Pipe *pipe;
    Evas_Coord x;
 
@@ -119,7 +118,6 @@ static void
 _key_pressed(void *data, Evas *e, Evas_Object *obj, void *event_info)
 {
    Evas_Event_Key_Down *ev = event_info;
-   EPhysics_Body *bird_body = data;
 
    if (!keep_moving_world)
      return;
@@ -211,7 +209,7 @@ _show_game_over_popup(Evas_Object *win)
 }
 
 static void
-_bird_update_cb(void *data, EPhysics_Body *bird_body, void *event_info)
+_bird_update_cb(void *data, EPhysics_Body *body, void *event_info)
 {
    Evas_Coord y;
 
@@ -226,7 +224,7 @@ _bird_update_cb(void *data, EPhysics_Body *bird_body, void *event_info)
 }
 
 static void
-_collision_cb(void *win, EPhysics_Body *bird_body, void *event_info)
+_collision_cb(void *win, EPhysics_Body *body, void *event_info)
 {
    EPhysics_Body_Collision *collision = event_info;
    EPhysics_Body *contact;
@@ -242,10 +240,10 @@ _collision_cb(void *win, EPhysics_Body *bird_body, void *event_info)
     }
 }
 
-EAPI_MAIN int
+static int
 elm_main(int argc EINA_UNUSED, char **argv EINA_UNUSED)
 {
-   Evas_Object *win, *bg, *ly, *ground_image, *bird_image;
+   Evas_Object *win, *bg, *ground_image, *bird_image;
    EPhysics_Body *ground_body;
    Evas *evas;
    Evas_Textblock_Style *style;
