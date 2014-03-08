@@ -4,6 +4,7 @@
 #define WIDTH 800
 #define HEIGHT 600
 
+#define BIRD_SIZE 50
 #define GROUND_HEIGHT 50
 
 #define WORLD_HEIGHT (HEIGHT-GROUND_HEIGHT)
@@ -25,10 +26,14 @@ static Eina_Inlist *pipes = NULL;
 static Eina_Bool keep_moving_world = EINA_TRUE;
 static EPhysics_Quaternion *bird_default_rotation;
 static Eina_Bool initialized = EINA_FALSE;
+static Evas_Object *score_text;
+static int score = 0;
+static Evas_Coord bird_x;
 
 typedef struct {
    EINA_INLIST;
    EPhysics_Body *top, *bottom;
+   Eina_Bool consumed;
 } Pipe;
 
 static int
@@ -56,7 +61,17 @@ _pipe_position_calc_and_place(Pipe *pipe, int x)
    evas_object_geometry_set(pipe_bottom_image, x, y, PIPE_WIDTH, h);
    ephysics_body_geometry_set(pipe->bottom, x, y, 1, PIPE_WIDTH, h, 1);
 
+   pipe->consumed = EINA_FALSE;
+
    return x;
+}
+
+static void
+score_update()
+{
+   char text[512];
+   sprintf(text, "%d", score);
+   evas_object_textblock_text_markup_set(score_text, text);
 }
 
 static Eina_Bool
@@ -79,7 +94,13 @@ _move_world(void *data)
         ephysics_body_geometry_get(pipe->bottom, &x, &y, &z, NULL, NULL, NULL);
         ephysics_body_move(pipe->bottom, x-1, y, z);
 
-        if (move == NULL && x + PIPE_WIDTH < -1)
+        if (bird_x > x && pipe->consumed == EINA_FALSE)
+          {
+             pipe->consumed = EINA_TRUE;
+             score++;
+             score_update();
+          }
+        else if (move == NULL && x + PIPE_WIDTH < -1)
           {
              move = pipe;
           }
@@ -170,6 +191,8 @@ _restart_btn_clicked(void *popup, Evas_Object *obj, void *event_info)
    ephysics_body_move(bird_body, WIDTH / 4, WORLD_HEIGHT / 2, 1);
    _generate_pipes_position(evas_object_evas_get(obj));
 
+   score = 0;
+   score_update();
    keep_moving_world = EINA_TRUE;
 }
 
@@ -225,6 +248,7 @@ elm_main(int argc EINA_UNUSED, char **argv EINA_UNUSED)
    Evas_Object *win, *bg, *ly, *ground_image, *bird_image;
    EPhysics_Body *ground_body;
    Evas *evas;
+   Evas_Textblock_Style *style;
 
    _fap_bird_test_log_dom = eina_log_domain_register("fap_bird", EINA_COLOR_GREEN);
    if (_fap_bird_test_log_dom < 0)
@@ -272,7 +296,8 @@ elm_main(int argc EINA_UNUSED, char **argv EINA_UNUSED)
 
    bird_image = evas_object_rectangle_add(evas);
    evas_object_color_set(bird_image, 255, 255, 255, 255);
-   evas_object_geometry_set(bird_image, WIDTH/4, WORLD_HEIGHT/2, 50, 50);
+   evas_object_geometry_set(bird_image, WIDTH/4, WORLD_HEIGHT/2, BIRD_SIZE, BIRD_SIZE);
+   bird_x = WIDTH/4 + BIRD_SIZE;
    evas_object_show(bird_image);
    bird_body = ephysics_body_box_add(world);
    ephysics_body_evas_object_set(bird_body, bird_image, EINA_TRUE);
@@ -287,12 +312,22 @@ elm_main(int argc EINA_UNUSED, char **argv EINA_UNUSED)
 
    _generate_pipes_position(evas);
 
+   score_text = evas_object_textblock_add(evas);
+   evas_object_move(score_text, 0, WORLD_HEIGHT * 0.07);
+   evas_object_resize(score_text, WIDTH, 50);
+   style = evas_textblock_style_new();
+   evas_textblock_style_set(style, "DEFAULT='font=Sans font_size=30 style=shadow color=#FFF text_class=entry align=center shadow_color=#000'");
+   evas_object_textblock_style_set(score_text, style);
+   evas_object_textblock_text_markup_set(score_text, "0");
+   evas_object_show(score_text);
+
    ecore_timer_add(0.01, _move_world, NULL);
    evas_object_event_callback_add(win, EVAS_CALLBACK_KEY_UP, _key_pressed, bird_body);
 
    elm_run();
 
    free(bird_default_rotation);
+   evas_textblock_style_free(style);
    ephysics_shutdown();
    eina_log_domain_unregister(_fap_bird_test_log_dom);
    _fap_bird_test_log_dom = -1;
